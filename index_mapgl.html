@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>Demo for vector</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.js"></script>
+    <link href="https://unpkg.com/maplibre-gl@2.1.9/dist/maplibre-gl.css" rel="stylesheet" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Static map demo</h1>
+    <p>In this page you can see a static map of Milan, Italy, working without external services (except the CDN for the
+        Javascript libraries, also optional).</p>
+    <p>Note that some parts of the map may fail to render, that's because they contain characters outside the 0-255
+        codepoint range and those font files are not included to reduce the repository size</p>
+    <div id="map"></div>
+    <script>
+
+        var bounds = [
+            [-127.10083007812501, 44.320112128003764,],
+            [-117.89978027343751, 51.67131229155612,],
+        ]
+
+        var map = new maplibregl.Map({
+            container: "map",
+            style: "http://127.0.0.1:8000/alidade_smooth_minimal.json",
+            zoom: 9,
+            minZoom: 6,
+            maxZoom: 14,
+            center: [-122.5, 48],
+            pitch: 25,
+            maxBounds: bounds // Sets bounds as max
+
+        })
+
+        async function getData() {
+
+
+            const metadataJSON = await fetch("http://127.0.0.1:8000/metadata.json")
+
+            const metadata = await metadataJSON.json()
+
+            const styleJSON = await fetch("http://127.0.0.1:8000/alidade_smooth_minimal.json")
+
+
+            const result = await styleJSON.json();
+            console.log(result.layers)
+
+            const layerNames = result.layers.map(layer => layer["source-layer"]).filter((v) => v)
+
+            // const misnamedLayers = 
+
+            const layersInData = metadata.vector_layers.map(v => v.id)
+
+
+            const misnamedLayers = layerNames.filter(layerName => !layersInData.includes(layerName))
+
+
+            console.log('misnamed layers', misnamedLayers)
+
+
+            const unusedDataLayers = layersInData.filter(v => !layerNames.includes(v))
+            console.log('unused data layers', unusedDataLayers)
+        }
+
+        getData()
+
+
+
+    </script>
+
+</body>
+
+</html>
